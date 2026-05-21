@@ -1,0 +1,105 @@
+#reqs {
+  border: 1px solid black;
+  border-radius: 3px;
+  width:37%;
+  padding: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+#reqs .reqs-header {
+  border-bottom: 1px solid black;
+  margin-bottom: 10px;
+  padding: 5px;
+  display: flex;
+}
+
+#reqs .reqs-header * {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#reqs .reqs-header .opt {
+  cursor: pointer;
+}
+
+#reqs .req {
+  margin: auto;
+  margin-bottom: 10px;
+}
+
+* {
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+.req {
+  width: 235px;
+  border: 1px solid black;
+  padding: 8px;
+  border-radius: 3px;
+}
+
+.req .header {
+  display: flex;
+  border-bottom: 1px solid black;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+}
+
+.req .out {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.req .header .flag {
+  width: 15px;
+  height: 15px;
+  background-color: red;
+  border-radius: 10px;
+  margin-left: 0;
+  margin-top: 2px;
+}
+
+.end, .edit, .regen{
+  margin-left: auto;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.req .header .title {
+  margin-left: 5px;
+  margin-right: auto;
+}
+
+.loader {
+  --size: 16px;
+  --border: 2px;
+  --color: #534AB7;
+  --dur: 0.80s;
+
+  width: var(--size);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  margin-left: 5px;
+  border: var(--border) solid var(--color);
+  animation:
+    spin-clip var(--dur) infinite linear alternate,
+    spin-flip calc(var(--dur) * 2) infinite linear;
+}
+
+@keyframes spin-clip {
+  0%    { clip-path: polygon(50% 50%,0 0,50% 0%,50% 0%,50% 0%,50% 0%,50% 0%) }
+  12.5% { clip-path: polygon(50% 50%,0 0,50% 0%,100% 0%,100% 0%,100% 0%,100% 0%) }
+  25%   { clip-path: polygon(50% 50%,0 0,50% 0%,100% 0%,100% 100%,100% 100%,100% 100%) }
+  50%   { clip-path: polygon(50% 50%,0 0,50% 0%,100% 0%,100% 100%,50% 100%,0% 100%) }
+  62.5% { clip-path: polygon(50% 50%,100% 0,100% 0%,100% 0%,100% 100%,50% 100%,0% 100%) }
+  75%   { clip-path: polygon(50% 50%,100% 100%,100% 100%,100% 100%,100% 100%,50% 100%,0% 100%) }
+  100%  { clip-path: polygon(50% 50%,50% 100%,50% 100%,50% 100%,50% 100%,50% 100%,0% 100%) }
+}
+
+@keyframes spin-flip {
+  0%     { transform: scaleY(1)  rotate(0deg) }
+  49.99% { transform: scaleY(1)  rotate(135deg) }
+  50%    { transform: scaleY(-1) rotate(0deg) }
+  100%   { transform: scaleY(-1) rotate(-135deg) }
+}
