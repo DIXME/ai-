@@ -33,7 +33,7 @@ class ChatRequest {
   req;
   element;
   stoped;
-  run() {
+  run(callback) {
     this.controller = new AbortController;
     const status = this.element.querySelector(".flag");
     const ttl = this.element.querySelector(".out");
@@ -44,6 +44,9 @@ class ChatRequest {
     this.req = create_request("/test", this.controller, this.data, (x) => {
       if (ttl.textContent == "Awaiting response...") {
         ttl.textContent = "";
+      }
+      if (callback) {
+        callback(x);
       }
       ttl.textContent += x;
     });
@@ -86,11 +89,12 @@ class ChatRequest {
 }
 
 // src/test.ts
+var reqs = document.getElementById("reqs");
 var rs = [];
 for (let i = 0;i < 3; i++) {
   const r = new ChatRequest;
   rs.push(r);
-  document.body.appendChild(r.element);
+  reqs.appendChild(r.element);
 }
 var requests = rs.map((r) => r.run());
 Promise.all(requests).then((x) => console.log("done!"));

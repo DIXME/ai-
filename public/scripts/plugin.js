@@ -33,7 +33,7 @@ class ChatRequest {
   req;
   element;
   stoped;
-  run() {
+  run(callback) {
     this.controller = new AbortController;
     const status = this.element.querySelector(".flag");
     const ttl = this.element.querySelector(".out");
@@ -44,6 +44,9 @@ class ChatRequest {
     this.req = create_request("/test", this.controller, this.data, (x) => {
       if (ttl.textContent == "Awaiting response...") {
         ttl.textContent = "";
+      }
+      if (callback) {
+        callback(x);
       }
       ttl.textContent += x;
     });
