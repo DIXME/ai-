@@ -58,8 +58,27 @@ class ChatRequest {
     });
     return this.req;
   }
+  runHeadless(callback) {
+    this.controller = new AbortController;
+    this.req = create_request("/test", this.controller, this.data, (x) => {
+      if (callback) {
+        callback(x);
+      }
+    });
+    this.req.then((c) => {
+      if (!this.stoped) {
+        console.log("stoped!");
+      }
+      console.log("✔️ done");
+    });
+    return this.req;
+  }
   el() {
     const template = document.getElementById("template");
+    if (!template) {
+      console.error("[ChatRequest] El template not found!");
+      return false;
+    }
     const el = template.cloneNode(true);
     const status = el.querySelector(".flag");
     el.id = "x";

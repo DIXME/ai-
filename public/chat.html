@@ -15,7 +15,20 @@
   <button class="toggle-btn" id="toggleLeft" title="Toggle convos">☰</button>
   <h1>Chat</h1>
   <button class="toggle-btn" id="toggleRight" title="Toggle info">⊞</button>
+  <script defer src="./scripts/chat.js"></script>
 </header>
+
+<div class="message outgoing" id="message-outgoing">
+  <div class="sender">You</div>
+  <div class="bubble">Yeah, sounds good — see you then!</div>
+  <div class="timestamp">2:34 PM</div>
+</div>
+
+<div class="message incoming" id="message-incoming">
+  <div class="sender">Alice</div>
+  <div class="bubble">Hey, are we still on for tomorrow?</div>
+  <div class="timestamp">2:30 PM</div>
+</div>
  
 <div class="layout">
  
@@ -42,19 +55,11 @@
     <div class="messages" id="messageList">
  
       <!-- ── MESSAGE TEMPLATE (incoming) ── -->
-      <div class="message-incoming">
-        <div class="sender">Alice</div>
-        <div class="bubble">Hey, are we still on for tomorrow?</div>
-        <div class="timestamp">2:30 PM</div>
-      </div>
+      
       <!-- ── END MESSAGE TEMPLATE (incoming) ── -->
  
       <!-- ── MESSAGE TEMPLATE (outgoing) ── -->
-      <div class="message-outgoing">
-        <div class="sender">You</div>
-        <div class="bubble">Yeah, sounds good — see you then!</div>
-        <div class="timestamp">2:34 PM</div>
-      </div>
+      
       <!-- ── END MESSAGE TEMPLATE (outgoing) ── -->
  
     </div>

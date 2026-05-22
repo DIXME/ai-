@@ -14,6 +14,10 @@
 --input-h: 56px;
 }
 
+#message-incoming, #message-outgoing {
+    display: none;
+}
+
 body {
 font-family: 'Courier New', monospace;
 background: var(--bg);

@@ -31,8 +31,10 @@ create_request(url: string, controller: AbortController, data: Object = {}, call
     })
 }
 
+export type MessageEntryRoles = "user"|"system"|"assistant"
+
 export type MessageEntry = {
-    role: "user"|"system"|"assistant",
+    role: MessageEntryRoles,
     content: string
 }
 
@@ -40,6 +42,10 @@ export type Messages = MessageEntry[]
 
 export interface ChatRequestPayload {
     messages: Messages
+}
+
+export interface AICharacter {
+    instructions: string
 }
 
 export class ChatRequest {
@@ -78,8 +84,25 @@ export class ChatRequest {
         return this.req
     }
 
-    el(): Node { // element factory
+    runHeadless(callback?:(x:string)=>void){
+        this.controller = new AbortController(); // new controller! important!
+        
+        this.req = create_request("/test",this.controller,this.data,x=>{
+            if(callback){callback(x)}
+        })
+
+        this.req.then(c => {
+            if(!this.stoped){
+                console.log("stoped!")
+            }
+            console.log('✔️ done')
+        })
+        return this.req
+    }
+
+    el(): Node | Boolean { // element factory
         const template = document.getElementById("template")
+        if(!template){console.error("[ChatRequest] El template not found!");return false}
         const el = template.cloneNode(true)
         const status = el.querySelector('.flag');
         el.id = "x"
