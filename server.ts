@@ -18,7 +18,7 @@ app.use(bodyParser.json())
 app.use(express.static(files))
 
 app.get("/", (req, res) => {
-    res.sendFile(files+"\\main.html")
+    res.sendFile(files+"\\chat.html")
 })
 
 app.post("/test", async (req, res, next) => {
