@@ -52,52 +52,54 @@ export class ChatRequest {
     data: ChatRequestPayload
     controller: AbortController
     req?: Promise<string>
-    element: Node
+    element?: Node
     stoped: Boolean
+    headless: boolean
 
     run(callback?:(x:string)=>void){
-        this.controller = new AbortController(); // new controller! important!
-        const status = this.element.querySelector('.flag');
-        const ttl = this.element.querySelector('.out')
-        const loading = this.element.querySelector('.loader')
+        if(this.headless){
+            this.controller = new AbortController(); // new controller! important!
+            
+            this.req = create_request("/test",this.controller,this.data,x=>{
+                if(callback){callback(x)}
+            })
 
-        status.style.backgroundColor = "red"
-        loading.style.display = "block"
-        ttl.textContent="Awaiting response..."
+            this.req.then(c => {
+                if(!this.stoped){
+                    console.log("stoped!")
+                }
+                console.log('✔️ done')
+            })
+            return this.req
+        } else {
+            this.controller = new AbortController(); // new controller! important!
+            const status = this.element.querySelector('.flag');
+            const ttl = this.element.querySelector('.out')
+            const loading = this.element.querySelector('.loader')
+
+            status.style.backgroundColor = "red"
+            loading.style.display = "block"
+            ttl.textContent="Awaiting response..."
+            
+            this.req = create_request("/test",this.controller,this.data,x=>{
+                if(ttl.textContent == "Awaiting response..."){
+                    ttl.textContent = ""
+                }
+                if(callback){
+                    callback(x)
+                }
+                ttl.textContent+=x
+            })
+
+            this.req.then(c => {
+                if(!this.stoped){
+                    status.style.backgroundColor = "green"
+                }
+                loading.style.display = "none"
+            })
+            return this.req
+        }
         
-        this.req = create_request("/test",this.controller,this.data,x=>{
-            if(ttl.textContent == "Awaiting response..."){
-                ttl.textContent = ""
-            }
-            if(callback){
-                callback(x)
-            }
-            ttl.textContent+=x
-        })
-
-        this.req.then(c => {
-            if(!this.stoped){
-                status.style.backgroundColor = "green"
-            }
-            loading.style.display = "none"
-        })
-        return this.req
-    }
-
-    runHeadless(callback?:(x:string)=>void){
-        this.controller = new AbortController(); // new controller! important!
-        
-        this.req = create_request("/test",this.controller,this.data,x=>{
-            if(callback){callback(x)}
-        })
-
-        this.req.then(c => {
-            if(!this.stoped){
-                console.log("stoped!")
-            }
-            console.log('✔️ done')
-        })
-        return this.req
     }
 
     el(): Node | Boolean { // element factory
@@ -121,11 +123,13 @@ export class ChatRequest {
         return el
     }
 
-    public constructor(data: ChatRequestPayload = {messages:[
-    {role:'system',content:'keep responses minimal, dont add extra information'},
-    {role:'user',content:'hello'}]}){
+    public constructor(
+        data: ChatRequestPayload = {messages:[]},
+        headless: boolean = true
+    ){
         this.data = data;
-        this.element = this.el()
+        this.headless=headless
+        if(!headless){this.element = this.el()}
         this.controller = new AbortController();
         this.stoped = false;
     }

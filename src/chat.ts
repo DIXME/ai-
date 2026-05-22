@@ -4,45 +4,32 @@ const msgInput = document.getElementById("msgInput") as HTMLInputElement
 const sendBtn   = document.getElementById("sendBtn") as HTMLButtonElement
 const messageList = document.getElementById("messageList") as HTMLDivElement
 
-function NewMessage(message: MessageEntry, outgoing: boolean = false){
+interface UIMessage {
+    sender?: string,
+    content?: string
+    timestamp?: string
+}
+
+function NewMessage({sender, content, timestamp}: UIMessage, outgoing: boolean = false){
     const template = document.getElementById(outgoing ? "message-outgoing" : "message-incoming")
     if (!template) throw new Error("Message template not found");
     const clone = template.cloneNode(true)
-    const sender = clone.querySelector('.sender')
-    const bubble = clone.querySelector('.bubble')
-    const timestamp = clone.querySelector('.timestamp')
+    const senderE = clone.querySelector('.sender')
+    const bubbleE = clone.querySelector('.bubble')
+    const timestampE = clone.querySelector('.timestamp')
     clone.id=""
-    sender.textContent = message.role
-    bubble.textContent = message.content
-    timestamp.textContent = Date.now()
+    senderE.textContent = sender ?? "Anon"
+    bubbleE.textContent = content ?? "..."
+    timestampE.textContent = timestamp ?? Date.now()
     return {
         clone,
-        sender,
-        bubble,
-        timestamp,
-        add: () => AddMessage(message.content,message.role)
+        senderE,
+        bubbleE,
+        timestampE
     }
 }
 
-function DisplayMessages(messages: Messages){
-    // Messages array -> Html Display
-    messageList.innerHTML = ""
-    messages.forEach((message: MessageEntry) => {
-        messageList.appendChild(
-            NewMessage(message,message.role=="user").clone
-        )
-    })
-}
-
-const MessagesList: Messages = [
-    {role:'system', content:'short responses, keep it simple, small as posiable, your texting the user, your the users mother'}
-]
-
-function AddMessage(content: string, role: MessageEntryRoles = "user"){
-    MessagesList.push({role,content})
-}
-
-export class AICharacter {
+class AICharacter {
     name: string
     instructions: string
 
@@ -59,7 +46,71 @@ export class AICharacter {
     }
 }
 
-export class AIConversation {}
+class AIConversation {
+    chars: AICharacter[]
+    context: Messages
+
+    Char(name: string): AICharacter | undefined {
+        return this.chars.find(c => c.name==name)
+    }
+
+    GenerateRules(): string {
+        return `
+        > You are a limted omniscient ai character roleplaying engine
+        
+        # Rules
+        > You cannot break character 
+        > Your responses must pretain and abide by the instructions and rules of the character you are responding for
+        > Make characters react emotionally and realistically
+        > Dont drag out a one sided interaction, for example if somone asks a question. end the response
+        
+        # Style
+        > You speak in third person
+        > You are aware of thoughts and feelings of only the charecter your currently responding for
+        > Your responses arent labeled
+        > Keep respones short, <2 paragraphs of content
+        > When responding for a charecter, keep in mind that charecter is oblivious to the thoughts and feelings of others 
+        > Every resopnse should include a meaningful escalation, not nesscarily physically, but also emotionally in the charecters
+        `
+    }
+    
+    GenerateAIContext(): string {
+        return `${this.chars.map(c => c.out()).join('\n')}`
+    }
+
+    AddMessageD(content: string, role: MessageEntryRoles = "user"){
+        this.context.push({role,content})
+    }
+
+    Init(): void {
+        // if there is none provided in the constructor your init here
+        this.AddMessageD(this.GenerateRules(),'system')
+        this.AddMessageD(this.GenerateAIContext(),'user')
+    }
+
+    AIMessage(name: string, instruction?: string): boolean {
+        const char = this.Char(name)
+        if(!char){ console.error(`[AIConversation] [AIMessage] [-] Failed to find char [${name}]}`);return false }
+        // if instruction is emptey, ai will rely on current context
+        this.AddMessageD(`respond for ${name}. ${instruction}`)
+        return true;
+    }
+
+    StreamOutput(cb:(x:string)=>void){
+        const r = new ChatRequest({messages:this.context},true)
+        r.run(x => cb(x))
+    }
+    
+    public constructor(chars: AICharacter[] = [], context: Messages = []){
+        this.chars=chars;
+        this.context=context;
+    }
+}
+
+const dudebro = new AICharacter("dudebro99", "mean, bully, asshole")
+const guy = new AICharacter("guy", "nice, kind, caring")
+const c = new AIConversation([guy,dudebro])
+c.Init()
 
 sendBtn.onclick = function(){
     const value = msgInput.value
@@ -69,31 +120,11 @@ sendBtn.onclick = function(){
         const cmd = split.shift().replace('/','')
         const input = split.join(' ')
         console.log(`${cmd} -> ${input}`)
-        switch(cmd){
-            case "ai":
-                AddMessage(`respond in character, ${input}`)
-                const ai = NewMessage({role:'assistant',content:''})
-                messageList.appendChild(ai.clone)
-                new ChatRequest({messages:MessagesList})
-                .runHeadless(x => ai.bubble.textContent+=x)
-                .then(result => ai.add())
-                break;
-            case "user":
-                AddMessage(`respond as ${c}, ${input}`)
-                const user = NewMessage({role:'user',content:''},true)
-                messageList.appendChild(user.clone)
-                new ChatRequest({messages:MessagesList})
-                .runHeadless(x => user.bubble.textContent+=x)
-                .then(result => user.add())
-                break;
-        }
-    } else {
-        const user = NewMessage({role:'user',content:msgInput.value},true)
-        const ai = NewMessage({role:'assistant',content:''})
-        messageList.appendChild(user.clone); user.add()
-        messageList.appendChild(ai.clone); // wait for full result first
-        const r = new ChatRequest({messages:MessagesList})
-        r.runHeadless(x => ai.bubble.textContent+=x)
-        .then(result => ai.add())
+        c.AIMessage(cmd,input)
+        const ai = NewMessage({sender:cmd,content:""})
+        messageList.appendChild(ai.clone)
+        c.StreamOutput((x: string) => {            
+            ai.bubbleE.textContent+=x
+        })
     }
 }

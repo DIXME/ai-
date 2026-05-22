@@ -33,45 +33,47 @@ class ChatRequest {
   req;
   element;
   stoped;
+  headless;
   run(callback) {
-    this.controller = new AbortController;
-    const status = this.element.querySelector(".flag");
-    const ttl = this.element.querySelector(".out");
-    const loading = this.element.querySelector(".loader");
-    status.style.backgroundColor = "red";
-    loading.style.display = "block";
-    ttl.textContent = "Awaiting response...";
-    this.req = create_request("/test", this.controller, this.data, (x) => {
-      if (ttl.textContent == "Awaiting response...") {
-        ttl.textContent = "";
-      }
-      if (callback) {
-        callback(x);
-      }
-      ttl.textContent += x;
-    });
-    this.req.then((c) => {
-      if (!this.stoped) {
-        status.style.backgroundColor = "green";
-      }
-      loading.style.display = "none";
-    });
-    return this.req;
-  }
-  runHeadless(callback) {
-    this.controller = new AbortController;
-    this.req = create_request("/test", this.controller, this.data, (x) => {
-      if (callback) {
-        callback(x);
-      }
-    });
-    this.req.then((c) => {
-      if (!this.stoped) {
-        console.log("stoped!");
-      }
-      console.log("✔️ done");
-    });
-    return this.req;
+    if (this.headless) {
+      this.controller = new AbortController;
+      this.req = create_request("/test", this.controller, this.data, (x) => {
+        if (callback) {
+          callback(x);
+        }
+      });
+      this.req.then((c) => {
+        if (!this.stoped) {
+          console.log("stoped!");
+        }
+        console.log("✔️ done");
+      });
+      return this.req;
+    } else {
+      this.controller = new AbortController;
+      const status = this.element.querySelector(".flag");
+      const ttl = this.element.querySelector(".out");
+      const loading = this.element.querySelector(".loader");
+      status.style.backgroundColor = "red";
+      loading.style.display = "block";
+      ttl.textContent = "Awaiting response...";
+      this.req = create_request("/test", this.controller, this.data, (x) => {
+        if (ttl.textContent == "Awaiting response...") {
+          ttl.textContent = "";
+        }
+        if (callback) {
+          callback(x);
+        }
+        ttl.textContent += x;
+      });
+      this.req.then((c) => {
+        if (!this.stoped) {
+          status.style.backgroundColor = "green";
+        }
+        loading.style.display = "none";
+      });
+      return this.req;
+    }
   }
   el() {
     const template = document.getElementById("template");
@@ -96,12 +98,12 @@ class ChatRequest {
     };
     return el;
   }
-  constructor(data = { messages: [
-    { role: "system", content: "keep responses minimal, dont add extra information" },
-    { role: "user", content: "hello" }
-  ] }) {
+  constructor(data = { messages: [] }, headless = true) {
     this.data = data;
-    this.element = this.el();
+    this.headless = headless;
+    if (!headless) {
+      this.element = this.el();
+    }
     this.controller = new AbortController;
     this.stoped = false;
   }
@@ -111,32 +113,99 @@ class ChatRequest {
 var msgInput = document.getElementById("msgInput");
 var sendBtn = document.getElementById("sendBtn");
 var messageList = document.getElementById("messageList");
-function NewMessage(message, outgoing = false) {
+function NewMessage({ sender, content, timestamp }, outgoing = false) {
   const template = document.getElementById(outgoing ? "message-outgoing" : "message-incoming");
   if (!template)
     throw new Error("Message template not found");
   const clone = template.cloneNode(true);
-  const sender = clone.querySelector(".sender");
-  const bubble = clone.querySelector(".bubble");
-  const timestamp = clone.querySelector(".timestamp");
+  const senderE = clone.querySelector(".sender");
+  const bubbleE = clone.querySelector(".bubble");
+  const timestampE = clone.querySelector(".timestamp");
   clone.id = "";
-  sender.textContent = message.role;
-  bubble.textContent = message.content;
-  timestamp.textContent = Date.now();
+  senderE.textContent = sender ?? "Anon";
+  bubbleE.textContent = content ?? "...";
+  timestampE.textContent = timestamp ?? Date.now();
   return {
     clone,
-    sender,
-    bubble,
-    timestamp,
-    add: () => AddMessage(message.content, message.role)
+    senderE,
+    bubbleE,
+    timestampE
   };
 }
-var MessagesList = [
-  { role: "system", content: "short responses, keep it simple, small as posiable, your texting the user, your the users mother" }
-];
-function AddMessage(content, role = "user") {
-  MessagesList.push({ role, content });
+
+class AICharacter {
+  name;
+  instructions;
+  constructor(name, instructions) {
+    this.name = name;
+    this.instructions = instructions;
+  }
+  out() {
+    return `
+        > Character Definition | ${this.name}
+        ${this.instructions}
+        `;
+  }
 }
+
+class AIConversation {
+  chars;
+  context;
+  Char(name) {
+    return this.chars.find((c) => c.name == name);
+  }
+  GenerateRules() {
+    return `
+        > You are a limted omniscient ai character roleplaying engine
+        
+        # Rules
+        > You cannot break character 
+        > Your responses must pretain and abide by the instructions and rules of the character you are responding for
+        > Make characters react emotionally and realistically
+        > Dont drag out a one sided interaction, for example if somone asks a question. end the response
+        
+        # Style
+        > You speak in third person
+        > You are aware of thoughts and feelings of only the charecter your currently responding for
+        > Your responses arent labeled
+        > Keep respones short, <2 paragraphs of content
+        > When responding for a charecter, keep in mind that charecter is oblivious to the thoughts and feelings of others 
+        > Every resopnse should include a meaningful escalation, not nesscarily physically, but also emotionally in the charecters
+        `;
+  }
+  GenerateAIContext() {
+    return `${this.chars.map((c) => c.out()).join(`
+`)}`;
+  }
+  AddMessageD(content, role = "user") {
+    this.context.push({ role, content });
+  }
+  Init() {
+    this.AddMessageD(this.GenerateRules(), "system");
+    this.AddMessageD(this.GenerateAIContext(), "user");
+  }
+  AIMessage(name, instruction) {
+    const char = this.Char(name);
+    if (!char) {
+      console.error(`[AIConversation] [AIMessage] [-] Failed to find char [${name}]}`);
+      return false;
+    }
+    this.AddMessageD(`respond for ${name}. ${instruction}`);
+    return true;
+  }
+  StreamOutput(cb) {
+    const r = new ChatRequest({ messages: this.context }, true);
+    r.run((x) => cb(x));
+  }
+  constructor(chars = [], context = []) {
+    this.chars = chars;
+    this.context = context;
+  }
+}
+var dudebro = new AICharacter("dudebro99", "mean, bully, asshole");
+var guy = new AICharacter("guy", "nice, kind, caring");
+var c = new AIConversation([guy, dudebro]);
+c.Init();
 sendBtn.onclick = function() {
   const value = msgInput.value;
   if (value[0] == "/") {
@@ -144,27 +213,11 @@ sendBtn.onclick = function() {
     const cmd = split.shift().replace("/", "");
     const input = split.join(" ");
     console.log(`${cmd} -> ${input}`);
-    switch (cmd) {
-      case "ai":
-        AddMessage(`respond in character, ${input}`);
-        const ai = NewMessage({ role: "assistant", content: "" });
-        messageList.appendChild(ai.clone);
-        new ChatRequest({ messages: MessagesList }).runHeadless((x) => ai.bubble.textContent += x).then((result) => ai.add());
-        break;
-      case "user":
-        AddMessage(`respond in character as your child, ${input}`);
-        const user = NewMessage({ role: "user", content: "" }, true);
-        messageList.appendChild(user.clone);
-        new ChatRequest({ messages: MessagesList }).runHeadless((x) => user.bubble.textContent += x).then((result) => user.add());
-        break;
-    }
-  } else {
-    const user = NewMessage({ role: "user", content: msgInput.value }, true);
-    const ai = NewMessage({ role: "assistant", content: "" });
-    messageList.appendChild(user.clone);
-    user.add();
+    c.AIMessage(cmd, input);
+    const ai = NewMessage({ sender: cmd, content: "" });
     messageList.appendChild(ai.clone);
-    const r = new ChatRequest({ messages: MessagesList });
-    r.runHeadless((x) => ai.bubble.textContent += x).then((result) => ai.add());
+    c.StreamOutput((x) => {
+      ai.bubbleE.textContent += x;
+    });
   }
 };

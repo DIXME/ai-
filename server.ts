@@ -3,8 +3,6 @@ import {build} from "./build.ts"
 import { create_request } from "./src/plugin.ts"
 import bodyParser from "body-parser"
 
-await build()
-
 const app = express()
 const model = "mistral"
 const files = (import.meta.dirname+"\\public") ?? ""
@@ -17,7 +15,8 @@ app.use((req, res, next) => {
 app.use(bodyParser.json())
 app.use(express.static(files))
 
-app.get("/", (req, res) => {
+app.get("/chat", async (req, res) => {
+    await build()
     res.sendFile(files+"\\chat.html")
 })
 
