@@ -113,6 +113,7 @@ class ChatRequest {
 var msgInput = document.getElementById("msgInput");
 var sendBtn = document.getElementById("sendBtn");
 var messageList = document.getElementById("messageList");
+var rightPanel = document.getElementById("log-body");
 function NewMessage({ sender, content, timestamp }, outgoing = false) {
   const template = document.getElementById(outgoing ? "message-outgoing" : "message-incoming");
   if (!template)
@@ -170,7 +171,9 @@ class AIConversation {
         > Your responses arent labeled
         > Keep respones short, <2 paragraphs of content
         > When responding for a charecter, keep in mind that charecter is oblivious to the thoughts and feelings of others 
-        > Every resopnse should include a meaningful escalation, not nesscarily physically, but also emotionally in the charecters
+        > Each resopnse should include a meaningful escalation, not nesscarily physically, but also emotionally in the charecters
+        > Each resopnse should ONLY include the thoughts feelings and actions of one charecter
+        > Each response should NOT include things external of the senario, for example "Responding For CHARNAME:" is not allowed
         `;
   }
   GenerateAIContext() {
@@ -184,18 +187,35 @@ class AIConversation {
     this.AddMessageD(this.GenerateRules(), "system");
     this.AddMessageD(this.GenerateAIContext(), "user");
   }
-  AIMessage(name, instruction) {
+  async AIMessage(name, instruction, cb) {
     const char = this.Char(name);
     if (!char) {
-      console.error(`[AIConversation] [AIMessage] [-] Failed to find char [${name}]}`);
-      return false;
+      throw new Error(`[AIConversation] [AIMessage] [-] Failed to find char [${name}]}`);
     }
     this.AddMessageD(`respond for ${name}. ${instruction}`);
-    return true;
-  }
-  StreamOutput(cb) {
-    const r = new ChatRequest({ messages: this.context }, true);
-    r.run((x) => cb(x));
+    const req = new ChatRequest({ messages: this.context }, true);
+    const log = document.createElement("span");
+    log.className = "log";
+    var all = "";
+    var done = false;
+    function renderLog() {
+      log.innerHTML = `
+            [${done ? "✓" : "loading..."}] AIMessage Request <br>
+            name-> ${name} <br>
+            instruction-> ${instruction} <br>
+            response-> ${all} <br>
+            `;
+    }
+    rightPanel.appendChild(log);
+    const r = await req.run((x) => {
+      cb(x);
+      all += x;
+      renderLog();
+    });
+    done = true;
+    renderLog();
+    c.AddMessageD(r, "assistant");
+    return r;
   }
   constructor(chars = [], context = []) {
     this.chars = chars;
@@ -206,6 +226,7 @@ var dudebro = new AICharacter("dudebro99", "mean, bully, asshole");
 var guy = new AICharacter("guy", "nice, kind, caring");
 var c = new AIConversation([guy, dudebro]);
 c.Init();
+console.log(msgInput, sendBtn);
 sendBtn.onclick = function() {
   const value = msgInput.value;
   if (value[0] == "/") {
@@ -213,10 +234,9 @@ sendBtn.onclick = function() {
     const cmd = split.shift().replace("/", "");
     const input = split.join(" ");
     console.log(`${cmd} -> ${input}`);
-    c.AIMessage(cmd, input);
     const ai = NewMessage({ sender: cmd, content: "" });
     messageList.appendChild(ai.clone);
-    c.StreamOutput((x) => {
+    c.AIMessage(cmd, input, (x) => {
       ai.bubbleE.textContent += x;
     });
   }

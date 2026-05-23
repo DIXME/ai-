@@ -56,7 +56,7 @@ export class ChatRequest {
     stoped: Boolean
     headless: boolean
 
-    run(callback?:(x:string)=>void){
+    run(callback?:(x:string)=>void): Promise<string>{
         if(this.headless){
             this.controller = new AbortController(); // new controller! important!
             

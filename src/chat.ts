@@ -3,6 +3,7 @@ import { create_request, ChatRequest, MessageEntry, Messages, MessageEntryRoles 
 const msgInput = document.getElementById("msgInput") as HTMLInputElement
 const sendBtn   = document.getElementById("sendBtn") as HTMLButtonElement
 const messageList = document.getElementById("messageList") as HTMLDivElement
+const rightPanel = document.getElementById("log-body") as HTMLDivElement
 
 interface UIMessage {
     sender?: string,
@@ -70,7 +71,9 @@ class AIConversation {
         > Your responses arent labeled
         > Keep respones short, <2 paragraphs of content
         > When responding for a charecter, keep in mind that charecter is oblivious to the thoughts and feelings of others 
-        > Every resopnse should include a meaningful escalation, not nesscarily physically, but also emotionally in the charecters
+        > Each resopnse should include a meaningful escalation, not nesscarily physically, but also emotionally in the charecters
+        > Each resopnse should ONLY include the thoughts feelings and actions of one charecter
+        > Each response should NOT include things external of the senario, for example "Responding For CHARNAME:" is not allowed
         `
     }
     
@@ -88,17 +91,35 @@ class AIConversation {
         this.AddMessageD(this.GenerateAIContext(),'user')
     }
 
-    AIMessage(name: string, instruction?: string): boolean {
+    async AIMessage(name: string, instruction?: string, cb:(x:string)=>void): Promise<string>{
         const char = this.Char(name)
-        if(!char){ console.error(`[AIConversation] [AIMessage] [-] Failed to find char [${name}]}`);return false }
+        if(!char){ throw new Error(`[AIConversation] [AIMessage] [-] Failed to find char [${name}]}`)}
         // if instruction is emptey, ai will rely on current context
         this.AddMessageD(`respond for ${name}. ${instruction}`)
-        return true;
-    }
 
-    StreamOutput(cb:(x:string)=>void){
-        const r = new ChatRequest({messages:this.context},true)
-        r.run(x => cb(x))
+        // req (stream output)
+        const req = new ChatRequest({messages:this.context},true)
+        const log = document.createElement("span")
+        log.className = "log"
+        var all = ""
+        var done = false
+        function renderLog(){
+            log.innerHTML= `
+            [${done ? "✓" : "loading..."}] AIMessage Request <br>
+            name-> ${name} <br>
+            instruction-> ${instruction} <br>
+            response-> ${all} <br>
+            `
+        }
+        rightPanel.appendChild(log)
+        const r = await req.run(x => {
+            cb(x)
+            all+=x
+            renderLog()
+        })
+        done=true;renderLog()
+        c.AddMessageD(r,'assistant')
+        return r;
     }
     
     public constructor(chars: AICharacter[] = [], context: Messages = []){
@@ -112,6 +133,8 @@ const guy = new AICharacter("guy", "nice, kind, caring")
 const c = new AIConversation([guy,dudebro])
 c.Init()
 
+console.log(msgInput,sendBtn)
+
 sendBtn.onclick = function(){
     const value = msgInput.value
     if(value[0]=='/'){
@@ -120,10 +143,9 @@ sendBtn.onclick = function(){
         const cmd = split.shift().replace('/','')
         const input = split.join(' ')
         console.log(`${cmd} -> ${input}`)
-        c.AIMessage(cmd,input)
         const ai = NewMessage({sender:cmd,content:""})
         messageList.appendChild(ai.clone)
-        c.StreamOutput((x: string) => {            
+        c.AIMessage(cmd,input,(x: string) => {            
             ai.bubbleE.textContent+=x
         })
     }
