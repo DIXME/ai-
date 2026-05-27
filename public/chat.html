@@ -1,189 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./css/chat.css">
-  <title>Chat</title>
-  <style>
-
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="./css/chat.css">
+<script src="./scripts/chat.js" defer></script>
+<title>Chat</title>
+<style>
+  
+</style>
 </head>
-
 <body>
+ 
+<header>
+  <button class="toggle-btn" id="toggleLeft" title="Toggle convos">☰</button>
+  <h1>Chat</h1>
+  <button class="toggle-btn" id="toggleRight" title="Toggle info">⊞</button>
+</header>
 
-  <header>
-    <button class="toggle-btn" id="toggleLeft" title="Toggle convos">☰</button>
-    <h1>Chat</h1>
-    <button class="toggle-btn" id="toggleRight" title="Toggle info">⊞</button>
-    <script defer src="./scripts/chat.js"></script>
-    <button class="theme-btn" id="themeToggle" onclick="togglePopup()">
-      <span class="dot"></span>
-      <span id="themeName">Linen</span>
-      <span class="chevron">▾</span>
-    </button>
-
-    <div class="theme-popup" id="themePopup">
-      <div class="popup-header">Theme</div>
-
-      <div class="theme-option active" id="opt-linen" onclick="applyTheme('linen','Linen','#1a1a1a','#f5f4f0','#d4d0ca')">
-        <div class="swatch-row">
-          <div class="sw" style="background:#1a1a1a"></div>
-          <div class="sw" style="background:#f5f4f0;border:1px solid #d4d0ca"></div>
-          <div class="sw" style="background:#eeecea"></div>
-        </div>
-        <div style="flex:1">
-          <div class="opt-name">Linen</div>
-          <div class="opt-desc">Monochrome · Courier · Sharp</div>
-        </div>
-        <span class="check">✓</span>
+<div class="message incoming" id="message-incoming">
+        <div class="sender">Alice</div>
+        <div class="bubble">Hey, are we still on for tomorrow?</div>
+        <div class="timestamp">2:30 PM</div>
       </div>
+<!-- ── END MESSAGE TEMPLATE (incoming) ── -->
 
-      <div class="theme-option" id="opt-slate" onclick="applyTheme('slate','Slate','#3b82f6','#1c1e22','#2e3138')">
-        <div class="swatch-row">
-          <div class="sw" style="background:#3b82f6"></div>
-          <div class="sw" style="background:#1c1e22"></div>
-          <div class="sw" style="background:#252830"></div>
-        </div>
-        <div style="flex:1">
-          <div class="opt-name">Slate</div>
-          <div class="opt-desc">Dark · Blue accent · Rounded</div>
-        </div>
-        <span class="check">✓</span>
+<!-- ── MESSAGE TEMPLATE (outgoing) ── -->
+<div class="message outgoing" id="message-outgoing">
+  <div class="sender">You</div>
+  <div class="bubble">Yeah, sounds good — see you then!</div>
+  <div class="timestamp">2:34 PM</div>
+</div>
+ 
+<div class="layout">
+ 
+  <!-- Left panel: Conversations -->
+  <aside class="panel" id="leftPanel">
+    <div class="panel-header">Convos</div>
+    <div class="panel-body" id="convoList">
+ 
+      <!-- ── CONVO ITEM TEMPLATE ── -->
+      <div class="convo-item active">
+        <div class="convo-name">Alice</div>
+        <div class="convo-preview">sounds good, see you then</div>
+        <div class="convo-time">2:34 PM</div>
       </div>
-
-      <div class="theme-option" id="opt-sage" onclick="applyTheme('sage','Sage','#2d5a3d','#f0f4f1','#c8d5cb')">
-        <div class="swatch-row">
-          <div class="sw" style="background:#2d5a3d"></div>
-          <div class="sw" style="background:#f0f4f1;border:1px solid #c8d5cb"></div>
-          <div class="sw" style="background:#e8eeea"></div>
-        </div>
-        <div style="flex:1">
-          <div class="opt-name">Sage</div>
-          <div class="opt-desc">Natural · Serif · Soft</div>
-        </div>
-        <span class="check">✓</span>
-      </div>
-
-      <div class="theme-option" id="opt-rose" onclick="applyTheme('rose','Rose','#c0392b','#fff8f7','#fcd5cf')">
-        <div class="swatch-row">
-          <div class="sw" style="background:#c0392b"></div>
-          <div class="sw" style="background:#fff8f7;border:1px solid #fcd5cf"></div>
-          <div class="sw" style="background:#fef2f0"></div>
-        </div>
-        <div style="flex:1">
-          <div class="opt-name">Rose</div>
-          <div class="opt-desc">Warm · Pill radius · Modern</div>
-        </div>
-        <span class="check">✓</span>
-      </div>
+      <!-- ── END CONVO ITEM TEMPLATE ── -->
+ 
     </div>
-  </header>
-
-  <div class="message outgoing" id="message-outgoing">
-    <div class="sender">You</div>
-    <div class="bubble">Yeah, sounds good — see you then!</div>
-    <div class="timestamp">2:34 PM</div>
-  </div>
-
-  <div class="message incoming" id="message-incoming">
-    <div class="sender">Alice</div>
-    <div class="bubble">Hey, are we still on for tomorrow?</div>
-    <div class="timestamp">2:30 PM</div>
-  </div>
-
-  <div class="layout">
-
-    <!-- Left panel: Conversations -->
-    <aside class="panel" id="leftPanel">
-      <div class="panel-header">Convos</div>
-      <div class="panel-body" id="convoList">
-
-        <!-- ── CONVO ITEM TEMPLATE ── -->
-        <div class="convo-item active">
-          <div class="convo-name">Alice</div>
-          <div class="convo-preview">sounds good, see you then</div>
-          <div class="convo-time">2:34 PM</div>
-        </div>
-        <!-- ── END CONVO ITEM TEMPLATE ── -->
-
-      </div>
-    </aside>
-
-    <!-- Main chat -->
-    <main class="chat-area">
-      <div class="chat-header">Alice</div>
-
-      <div class="messages" id="messageList">
-
-        <!-- ── MESSAGE TEMPLATE (incoming) ── -->
-
-        <!-- ── END MESSAGE TEMPLATE (incoming) ── -->
-
-        <!-- ── MESSAGE TEMPLATE (outgoing) ── -->
-
-        <!-- ── END MESSAGE TEMPLATE (outgoing) ── -->
-
-      </div>
-
-      <div class="input-bar">
-        <input type="text" placeholder="Type a message…" id="msgInput">
-        <button class="send-btn" id="sendBtn">
-          <svg viewBox="0 0 24 24">
-            <path d="M2 21l21-9L2 3v7l15 2-15 2z" />
-          </svg>
-        </button>
-      </div>
-    </main>
-
-    <!-- Right panel: Info / details -->
-    <aside class="panel right collapsed" id="rightPanel">
-      <div class="panel-header">Info</div>
-      <div class="panel-body" id="log-body">
-      </div>
-    </aside>
-
-  </div>
-
-  <script>
-    
-const themes = {
-  linen: 't-linen', slate: 't-slate', sage: 't-sage', rose: 't-rose'
-};
-let current = 'linen';
-let popupOpen = false;
-
-function togglePopup() {
-  popupOpen = !popupOpen;
-  document.getElementById('themePopup').classList.toggle('open', popupOpen);
-}
-
-function applyTheme(id, name, accent, bg, border) {
-  const root = document.getElementById('root');
-  Object.values(themes).forEach(c => root.classList.remove(c));
-  root.classList.add(themes[id]);
-
-  document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('active'));
-  document.getElementById('opt-' + id).classList.add('active');
-
-  document.getElementById('themeName').textContent = name;
-  document.querySelector('.theme-btn .dot').style.background = accent;
-
-  popupOpen = false;
-  document.getElementById('themePopup').classList.remove('open');
-  current = id;
-}
-
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('#themeToggle') && !e.target.closest('#themePopup')) {
-    popupOpen = false;
-    document.getElementById('themePopup').classList.remove('open');
-  }
-});
-
-  </script>
-
+  </aside>
+ 
+  <!-- Main chat -->
+  <main class="chat-area">
+    <div class="chat-header">Alice</div>
+ 
+    <div class="messages" id="messageList">
+ 
+      <!-- ── MESSAGE TEMPLATE (incoming) ── -->
+      
+      <!-- ── END MESSAGE TEMPLATE (outgoing) ── -->
+ 
+    </div>
+ 
+    <div class="input-bar">
+      <input type="text" placeholder="Type a message…" id="msgInput">
+      <button class="send-btn" id="sendBtn">
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </main>
+ 
+  <!-- Right panel: Info / details -->
+  <aside class="panel right collapsed" id="rightPanel">
+    <div class="panel-header">Info</div>
+    <div class="panel-body" id="panel-body">
+      <p style="font-size:12px;color:var(--text-muted);padding:4px 2px;">Contact details, media, etc.</p>
+    </div>
+  </aside>
+ 
+</div>
+ 
+<script>
+  document.getElementById('toggleLeft').addEventListener('click', () => {
+    document.getElementById('leftPanel').classList.toggle('collapsed');
+  });
+  document.getElementById('toggleRight').addEventListener('click', () => {
+    document.getElementById('rightPanel').classList.toggle('collapsed');
+  });
+</script>
+ 
 </body>
-
 </html>

@@ -3,7 +3,7 @@ import { create_request, ChatRequest, MessageEntry, Messages, MessageEntryRoles 
 const msgInput = document.getElementById("msgInput") as HTMLInputElement
 const sendBtn   = document.getElementById("sendBtn") as HTMLButtonElement
 const messageList = document.getElementById("messageList") as HTMLDivElement
-const rightPanel = document.getElementById("log-body") as HTMLDivElement
+const rightPanel = document.getElementById("panel-body") as HTMLDivElement
 
 interface UIMessage {
     sender?: string,
@@ -128,6 +128,14 @@ class AIConversation {
     }
 }
 
+function ParseAIConversation(c: AIConversation){
+    messageList.innerHTML=""
+    c.context.forEach((m: MessageEntry) => {
+        const msg = NewMessage({sender:m.role,content:m.content},m.role=="user")
+        messageList.appendChild(msg.clone)
+    })
+}
+
 const dudebro = new AICharacter("dudebro99", "mean, bully, asshole")
 const guy = new AICharacter("guy", "nice, kind, caring")
 const c = new AIConversation([guy,dudebro])
@@ -135,18 +143,32 @@ c.Init()
 
 console.log(msgInput,sendBtn)
 
-sendBtn.onclick = function(){
-    const value = msgInput.value
-    if(value[0]=='/'){
-        // cmd
-        const split = value.split(' ')
-        const cmd = split.shift().replace('/','')
-        const input = split.join(' ')
-        console.log(`${cmd} -> ${input}`)
-        const ai = NewMessage({sender:cmd,content:""})
-        messageList.appendChild(ai.clone)
-        c.AIMessage(cmd,input,(x: string) => {            
-            ai.bubbleE.textContent+=x
-        })
-    }
+function CommandHandler(value: string = msgInput.value){
+    return new Promise(resolve => {
+        if(value[0]=='/'){
+            // cmd
+            const split = value.split(' ')
+            const cmd = split.shift().replace('/','')
+            const input = split.join(' ')
+            console.log(`${cmd} -> ${input}`)
+            const ai = NewMessage({sender:cmd,content:""})
+            messageList.appendChild(ai.clone)
+            c.AIMessage(cmd,input,(x: string) => {            
+                ai.bubbleE.textContent+=x
+            }).then(r=>resolve(r))
+        }
+    })
+    
 }
+
+async function main(){
+    await CommandHandler('/dudebro99 go bully guy in the hallway')
+    await CommandHandler('/guy')
+    console.log("context\n["+c.context.map(m => `{role:${m.role},content:${m.content}}`).join(',')+"]")
+    ParseAIConversation(c)
+}
+
+
+sendBtn.onclick = () => CommandHandler()
+
+main()

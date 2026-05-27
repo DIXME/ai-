@@ -113,7 +113,7 @@ class ChatRequest {
 var msgInput = document.getElementById("msgInput");
 var sendBtn = document.getElementById("sendBtn");
 var messageList = document.getElementById("messageList");
-var rightPanel = document.getElementById("log-body");
+var rightPanel = document.getElementById("panel-body");
 function NewMessage({ sender, content, timestamp }, outgoing = false) {
   const template = document.getElementById(outgoing ? "message-outgoing" : "message-incoming");
   if (!template)
@@ -222,22 +222,39 @@ class AIConversation {
     this.context = context;
   }
 }
+function ParseAIConversation(c) {
+  messageList.innerHTML = "";
+  c.context.forEach((m) => {
+    const msg = NewMessage({ sender: m.role, content: m.content }, m.role == "user");
+    messageList.appendChild(msg.clone);
+  });
+}
 var dudebro = new AICharacter("dudebro99", "mean, bully, asshole");
 var guy = new AICharacter("guy", "nice, kind, caring");
 var c = new AIConversation([guy, dudebro]);
 c.Init();
 console.log(msgInput, sendBtn);
-sendBtn.onclick = function() {
-  const value = msgInput.value;
-  if (value[0] == "/") {
-    const split = value.split(" ");
-    const cmd = split.shift().replace("/", "");
-    const input = split.join(" ");
-    console.log(`${cmd} -> ${input}`);
-    const ai = NewMessage({ sender: cmd, content: "" });
-    messageList.appendChild(ai.clone);
-    c.AIMessage(cmd, input, (x) => {
-      ai.bubbleE.textContent += x;
-    });
-  }
-};
+function CommandHandler(value = msgInput.value) {
+  return new Promise((resolve) => {
+    if (value[0] == "/") {
+      const split = value.split(" ");
+      const cmd = split.shift().replace("/", "");
+      const input = split.join(" ");
+      console.log(`${cmd} -> ${input}`);
+      const ai = NewMessage({ sender: cmd, content: "" });
+      messageList.appendChild(ai.clone);
+      c.AIMessage(cmd, input, (x) => {
+        ai.bubbleE.textContent += x;
+      }).then((r) => resolve(r));
+    }
+  });
+}
+async function main() {
+  await CommandHandler("/dudebro99 go bully guy in the hallway");
+  await CommandHandler("/guy");
+  console.log(`context
+[` + c.context.map((m) => `{role:${m.role},content:${m.content}}`).join(",") + "]");
+  ParseAIConversation(c);
+}
+sendBtn.onclick = () => CommandHandler();
+main();
