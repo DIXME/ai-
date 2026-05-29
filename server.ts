@@ -20,6 +20,11 @@ app.get("/chat", async (req, res) => {
     res.sendFile(files+"\\chat.html")
 })
 
+app.get("/test", async (req, res) => {
+    await build()
+    res.sendFile(files+"\\test.html")
+})
+
 app.post("/test", async (req, res, next) => {
     const messages = req.body["messages"] ?? [
     {role:'system',content:'keep responses minimal, dont add extra information'},

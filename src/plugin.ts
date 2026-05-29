@@ -1,3 +1,7 @@
+export interface ChatRequestPayload {
+    messages: Messages
+}
+
 export async function 
 create_request(url: string, controller: AbortController, data: Object = {}, callback:(x: string)=>void=c=>{}): Promise<string>{
     const signal = controller.signal
@@ -29,23 +33,6 @@ create_request(url: string, controller: AbortController, data: Object = {}, call
             resolve(e)
         })
     })
-}
-
-export type MessageEntryRoles = "user"|"system"|"assistant"
-
-export type MessageEntry = {
-    role: MessageEntryRoles,
-    content: string
-}
-
-export type Messages = MessageEntry[]
-
-export interface ChatRequestPayload {
-    messages: Messages
-}
-
-export interface AICharacter {
-    instructions: string
 }
 
 export class ChatRequest {

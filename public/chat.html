@@ -1,93 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="./css/chat.css">
-<script src="./scripts/chat.js" defer></script>
-<title>Chat</title>
-<style>
-  
-</style>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Martian+Mono:wght@100..800&display=swap');
+  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/chat.css">
+  <script src="./scripts/chat.js" defer></script>
+  <title>Chat</title>
+  <style>
+
+  </style>
 </head>
+
 <body>
- 
-<header>
-  <button class="toggle-btn" id="toggleLeft" title="Toggle convos">☰</button>
-  <h1>Chat</h1>
-  <button class="toggle-btn" id="toggleRight" title="Toggle info">⊞</button>
-</header>
 
-<div class="message incoming" id="message-incoming">
-        <div class="sender">Alice</div>
-        <div class="bubble">Hey, are we still on for tomorrow?</div>
-        <div class="timestamp">2:30 PM</div>
-      </div>
-<!-- ── END MESSAGE TEMPLATE (incoming) ── -->
+  <header>
+    <button class="toggle-btn" id="toggleLeft" title="Toggle convos">☰</button>
+    <h1>Chat</h1>
+    <button class="toggle-btn" id="toggleRight" title="Toggle info">⊞</button>
+  </header>
 
-<!-- ── MESSAGE TEMPLATE (outgoing) ── -->
-<div class="message outgoing" id="message-outgoing">
-  <div class="sender">You</div>
-  <div class="bubble">Yeah, sounds good — see you then!</div>
-  <div class="timestamp">2:34 PM</div>
-</div>
- 
-<div class="layout">
- 
-  <!-- Left panel: Conversations -->
-  <aside class="panel" id="leftPanel">
-    <div class="panel-header">Convos</div>
-    <div class="panel-body" id="convoList">
- 
-      <!-- ── CONVO ITEM TEMPLATE ── -->
-      <div class="convo-item active">
-        <div class="convo-name">Alice</div>
-        <div class="convo-preview">sounds good, see you then</div>
-        <div class="convo-time">2:34 PM</div>
+  <div class="message incoming" id="message-incoming">
+    <div class="sender">Alice</div>
+    <div class="bubble">Hey, are we still on for tomorrow?</div>
+    <div class="timestamp">2:30 PM</div>
+  </div>
+  <!-- ── END MESSAGE TEMPLATE (incoming) ── -->
+
+  <!-- ── MESSAGE TEMPLATE (outgoing) ── -->
+  <div class="message outgoing" id="message-outgoing">
+    <div class="sender">You</div>
+    <div class="bubble">Yeah, sounds good — see you then!</div>
+    <div class="timestamp">2:34 PM</div>
+  </div>
+
+  <div id="popup-menu-template" class="popup">
+  </div>
+
+  <div class="layout" id="layout">
+
+    <!-- Left panel: Conversations -->
+    <aside class="panel" id="leftPanel">
+      <div class="panel-header">Convos</div>
+      <div class="panel-body" id="convoList">
+
+        <!-- ── CONVO ITEM TEMPLATE ── -->
+        <div class="convo-item active">
+          <div class="convo-name">Alice</div>
+          <div class="convo-preview">sounds good, see you then</div>
+          <div class="convo-time">2:34 PM</div>
+        </div>
+        <!-- ── END CONVO ITEM TEMPLATE ── -->
+
       </div>
-      <!-- ── END CONVO ITEM TEMPLATE ── -->
- 
-    </div>
-  </aside>
- 
-  <!-- Main chat -->
-  <main class="chat-area">
-    <div class="chat-header">Alice</div>
- 
-    <div class="messages" id="messageList">
- 
-      <!-- ── MESSAGE TEMPLATE (incoming) ── -->
-      
-      <!-- ── END MESSAGE TEMPLATE (outgoing) ── -->
- 
-    </div>
- 
-    <div class="input-bar">
-      <input type="text" placeholder="Type a message…" id="msgInput">
-      <button class="send-btn" id="sendBtn">
-        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-      </button>
-    </div>
-  </main>
- 
-  <!-- Right panel: Info / details -->
-  <aside class="panel right collapsed" id="rightPanel">
-    <div class="panel-header">Info</div>
-    <div class="panel-body" id="panel-body">
-      <p style="font-size:12px;color:var(--text-muted);padding:4px 2px;">Contact details, media, etc.</p>
-    </div>
-  </aside>
- 
-</div>
- 
-<script>
-  document.getElementById('toggleLeft').addEventListener('click', () => {
-    document.getElementById('leftPanel').classList.toggle('collapsed');
-  });
-  document.getElementById('toggleRight').addEventListener('click', () => {
-    document.getElementById('rightPanel').classList.toggle('collapsed');
-  });
-</script>
- 
+    </aside>
+
+    <!-- Main chat -->
+    <main class="chat-area">
+      <div class="chat-header">Alice</div>
+
+      <div class="messages" id="messageList">
+
+        <!-- ── MESSAGE TEMPLATE (incoming) ── -->
+
+        <!-- ── END MESSAGE TEMPLATE (outgoing) ── -->
+
+      </div>
+
+      <div class="input-bar">
+        <input type="text" placeholder="Type a message…" id="msgInput">
+        <button class="send-btn" id="sendBtn">
+          <svg viewBox="0 0 24 24">
+            <path d="M2 21l21-9L2 3v7l15 2-15 2z" />
+          </svg>
+        </button>
+      </div>
+    </main>
+
+    <!-- Right panel: Info / details -->
+    <aside class="panel right collapsed" id="rightPanel">
+      <div class="panel-header">Info</div>
+      <div class="panel-body" id="panel-body">
+        <p style="font-size:12px;color:var(--text-muted);padding:4px 2px;">Contact details, media, etc.</p>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    document.getElementById('toggleLeft').addEventListener('click', () => {
+      document.getElementById('leftPanel').classList.toggle('collapsed');
+    });
+    document.getElementById('toggleRight').addEventListener('click', () => {
+      document.getElementById('rightPanel').classList.toggle('collapsed');
+    });
+  </script>
+
 </body>
+
 </html>

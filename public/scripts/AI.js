@@ -224,64 +224,10 @@ class AIConversation {
     return c;
   }
 }
-
-// src/chat.ts
-var msgInput = document.getElementById("msgInput");
-var sendBtn = document.getElementById("sendBtn");
-var messageList = document.getElementById("messageList");
-var rightPanel = document.getElementById("panel-body");
-function NewMessage({ sender, content, timestamp }, outgoing = false) {
-  const template = document.getElementById(outgoing ? "message-outgoing" : "message-incoming");
-  if (!template)
-    throw new Error("Message template not found");
-  const clone = template.cloneNode(true);
-  const senderE = clone.querySelector(".sender");
-  const bubbleE = clone.querySelector(".bubble");
-  const timestampE = clone.querySelector(".timestamp");
-  clone.id = "";
-  senderE.textContent = sender ?? "Anon";
-  bubbleE.textContent = content ?? "...";
-  timestampE.textContent = timestamp ?? Date.now();
-  return {
-    clone,
-    senderE,
-    bubbleE,
-    timestampE
-  };
-}
-function ParseAIConversation(c) {
-  messageList.innerHTML = "";
-  c.context.forEach((m) => {
-    if (m.role == "assistant") {
-      const insc_message = c.context[c.context.indexOf(m) - 1].content;
-      console.log(insc_message.split(".")[0].replace("respond as ", ""));
-      const msg = NewMessage({ sender: m.role, content: m.content });
-      messageList.appendChild(msg.clone);
-    }
-  });
-}
-var dudebro = new AICharacter("dudebro99", "mean, bully, asshole");
-var guy = new AICharacter("guy", "nice, kind, caring");
-var c = new AIConversation([guy, dudebro]);
-c.Init();
-console.log(msgInput, sendBtn);
-function CommandHandler(value = msgInput.value) {
-  return new Promise((resolve) => {
-    if (value[0] == "/") {
-      const split = value.split(" ");
-      const cmd = split.shift().replace("/", "");
-      const input = split.join(" ");
-      console.log(`${cmd} -> ${input}`);
-      const ai = NewMessage({ sender: cmd, content: "" });
-      messageList.appendChild(ai.clone);
-      c.AIMessage(cmd, input, (x) => {
-        ai.bubbleE.textContent += x;
-      }).then((r) => resolve(r));
-    }
-  });
-}
-sendBtn.onclick = () => CommandHandler();
-load();
-console.log(Storage);
-var df = Storage.Conversations[0];
-ParseAIConversation(df);
+export {
+  save,
+  load,
+  Storage,
+  AIConversation,
+  AICharacter
+};
