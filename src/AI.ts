@@ -122,6 +122,7 @@ export class AIConversation {
             response-> ${all} <br>
             `
         }
+        typeof [] == "boolean"
         this.logs.push(log)
         const r = await req.run(x => {
             cb(x)
