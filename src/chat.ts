@@ -1,5 +1,6 @@
 import { create_request, ChatRequest } from "./plugin";
 import { AICharacter, AIConversation, MessageEntry, MessageEntryRoles, Messages, save, load, Storage } from "./AI";
+import { ObjectViewer } from "./ObjectViewer";
 
 const msgInput = document.getElementById("msgInput") as HTMLInputElement
 const sendBtn = document.getElementById("sendBtn") as HTMLButtonElement
@@ -36,12 +37,15 @@ function ParseAIConversation(c: AIConversation) {
     c.context.forEach((m: MessageEntry) => {
         if(m.role=="assistant"){
             const insc_message: string = c.context[c.context.indexOf(m)-1].content
-            console.log(insc_message.split('.')[0].replace("respond as ",""))
-            const msg = NewMessage({ sender: m.role, content: m.content })
+            const name = insc_message.split('.')[0].replace("respond as ","")
+            const msg = NewMessage({ sender: name, content: m.content })
             messageList.appendChild(msg.clone)   
         }
-        
     })
+    c.logs.forEach((log:HTMLSpanElement) => {
+        rightPanel.appendChild(log)
+    })
+    console.log(c)
 }
 
 const dudebro = new AICharacter("dudebro99", "mean, bully, asshole")
@@ -79,9 +83,9 @@ async function main() {
 
 sendBtn.onclick = () => CommandHandler()
 
-//main()
-load()
-console.log(Storage)
+main()
 
-const df: AIConversation = Storage.Conversations[0]
-ParseAIConversation(df)
+/*
+main()
+
+*/

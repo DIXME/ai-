@@ -3,6 +3,7 @@ type PopupMenuArgs = {
   content?: HTMLElement | string
 }
 
+export
 function PopupMenu({ title, content }: PopupMenuArgs = {}) {
   const root = document.getElementById("layout");
   const menu: HTMLDivElement = document.getElementById("popup-template").cloneNode(true) as HTMLDivElement
@@ -35,6 +36,7 @@ function Format(x: any): string {
   return x
 }
 
+export
 function ObjectViewer(name, object) {
   const keys = Object.keys(object)
   const content = keys.map(key => {
@@ -60,53 +62,68 @@ function ObjectViewer(name, object) {
       if(typeof val == 'string'){
         object[key] = input.value
       } else if (typeof val == 'object'){
-        object[key] = JSON.parse(input.val)
+        object[key] = JSON.parse(input.value)
       } else if (typeof val == 'number'){
         object[key] = parseInt(input.value)
       } else if (typeof val == 'boolean'){
-        object[key] = JSON.parse(input.value)
+        object[key] = JSON.parse(input.checked)
       } else {
         console.log("???",input.value)
         return `???`
       }
     })
   }
-  
-  
+  menu.menu.querySelector("#apply").onclick = apply
+  menu.menu.querySelector("#copy").onclick = () => {
+    navigator.clipboard.writeText(JSON.stringify(object))
+  }
+  menu.menu.querySelector("#save-as").onclick = () => {
+    const blob = new Blob([JSON.stringify(object)],{ type: "text/plain" })
+    const url = URL.createObjectURL(blob);
+    const tempAnchor = document.createElement("a");
+    tempAnchor.href = url;
+    tempAnchor.download = `${name}-snapshot.json`;
+    tempAnchor.click()
+    URL.revokeObjectURL(url);
+  }
   return menu
 }
 
-const ex = {
-  "id": 101,
-  "username": "jdoe_dev",
-  "isActive": true,
-  "profile": {
-    "firstName": "John",
-    "lastName": "Doe",
-    "age": 30,
-    "location": {
-      "city": "New York",
-      "coordinates": {
-        "lat": 40.7128,
-        "long": -74.0060
+function main(){
+  const ex = {
+    "id": 101,
+    "username": "jdoe_dev",
+    "isActive": true,
+    "profile": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "age": 30,
+      "location": {
+        "city": "New York",
+        "coordinates": {
+          "lat": 40.7128,
+          "long": -74.0060
+        }
       }
-    }
-  },
-  "tags": ["developer", "json", "example"],
-  "roles": [
-    {
-      "roleId": 1,
-      "roleName": "admin"
     },
-    {
-      "roleId": 2,
-      "roleName": "user"
-    }
-  ],
-  "preferences": null,
-  "score": 95.5
+    "tags": ["developer", "json", "example"],
+    "roles": [
+      {
+        "roleId": 1,
+        "roleName": "admin"
+      },
+      {
+        "roleId": 2,
+        "roleName": "user"
+      }
+    ],
+    "preferences": null,
+    "score": 95.5
+  }
+
+  const m = ObjectViewer("📖 Example Object", ex)
+  m.toggle()
+  console.log(m)
 }
 
-const m = ObjectViewer("📖 Example Object", ex)
-m.toggle()
-console.log(m)
+main()

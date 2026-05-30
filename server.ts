@@ -1,7 +1,7 @@
 import express from "express"
 import {build} from "./build.ts"
-import { create_request } from "./src/plugin.ts"
 import bodyParser from "body-parser"
+import ollama from "ollama"
 
 const app = express()
 const model = "mistral"
@@ -36,24 +36,24 @@ app.post("/test", async (req, res, next) => {
             console.log("[-] disconnected / aborted request") 
         }
     })
-    create_request("http://localhost:11434/api/chat",new AbortController(),{
-        messages,
-        model
-    },x=>{
-        const r = JSON.parse(x)
-        if(r.done){
-            completed=true
-            console.log("[+] request completed!")
-            res.end()
-            res.status(200)
-        }
-        res.write(r.message.content)
-    })
-    .then(r => {
 
+    ollama.chat({
+        stream:true,
+        keep_alive:"15m",
+        model:"mistral",
+        messages:messages
+    })
+    .then(async r => {
+        for await (const chunk of r) {
+            res.write(chunk.message.content)
+        }
+        res.end()
+        res.status(200)
     })
     .catch(e => {
-        console.log("err: "+e.message)
+        console.error(e)
+        res.end()
+        res.status(500)
     })
 })
 

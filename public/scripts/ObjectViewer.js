@@ -1,4 +1,4 @@
-// src/test.ts
+// src/ObjectViewer.ts
 function PopupMenu({ title, content } = {}) {
   const root = document.getElementById("layout");
   const menu = document.getElementById("popup-template").cloneNode(true);
